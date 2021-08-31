@@ -8,4 +8,5 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 @Repository
 public interface ArticuloRepository extends JpaRepository<Articulo, Integer> {
+    boolean existsByTitulo(String titulo);
 }

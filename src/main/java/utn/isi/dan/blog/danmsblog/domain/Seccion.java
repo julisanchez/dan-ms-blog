@@ -1,5 +1,6 @@
 package utn.isi.dan.blog.danmsblog.domain;
 
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -13,12 +14,14 @@ public class Seccion {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
+    @Column(name = "TITULO", nullable = false)
     private String titulo;
 
+    @Column(name = "TEXTO", length = 1024, nullable = false)
     private String texto;
 
     @ManyToOne
-    @JoinColumn(name = "ARTICULO_ID")
+    @JoinColumn(name = "ARTICULO_ID",nullable = false)
     private Articulo articulo;
 
     public Seccion() {

@@ -1,6 +1,7 @@
 package utn.isi.dan.blog.danmsblog.domain;
 
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.persistence.CascadeType;
@@ -36,7 +37,7 @@ public class Articulo {
     private List<Seccion> secciones;
 
     @OneToMany(mappedBy = "articulo")
-    private List<Calificacion> calificaciones;
+    private List<Calificacion> calificaciones = new ArrayList<>();
 
     public Articulo() {
     }

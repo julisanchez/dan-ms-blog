@@ -14,6 +14,7 @@ import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
 import utn.isi.dan.blog.danmsblog.exception.ArticuloNotFoundException;
+import utn.isi.dan.blog.danmsblog.exception.TituloAlreadyExistsException;
 
 @ControllerAdvice
 public class ValidationHandler extends ResponseEntityExceptionHandler {
@@ -36,6 +37,13 @@ public class ValidationHandler extends ResponseEntityExceptionHandler {
         ErrorResponse response = new ErrorResponse("articulo-not-found", ex.getLocalizedMessage(), ex.getDetail());
 
         return new ResponseEntity<Object>(response, HttpStatus.NOT_FOUND);
+    }
+
+    @ExceptionHandler(TituloAlreadyExistsException.class)
+    public ResponseEntity<Object> handleTitleAlreadyExists(TituloAlreadyExistsException ex, WebRequest request) {
+        ErrorResponse response = new ErrorResponse("titulo-already-exists", ex.getLocalizedMessage(), ex.getDetail());
+
+        return new ResponseEntity<>(response, HttpStatus.CONFLICT);
     }
 
 }

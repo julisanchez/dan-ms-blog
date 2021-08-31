@@ -13,6 +13,7 @@ import utn.isi.dan.blog.danmsblog.dao.CalificacionRepository;
 import utn.isi.dan.blog.danmsblog.domain.Articulo;
 import utn.isi.dan.blog.danmsblog.domain.Calificacion;
 import utn.isi.dan.blog.danmsblog.exception.ArticuloNotFoundException;
+import utn.isi.dan.blog.danmsblog.exception.TituloAlreadyExistsException;
 import utn.isi.dan.blog.danmsblog.mapstruct.dto.ArticuloBasicoDto;
 import utn.isi.dan.blog.danmsblog.mapstruct.dto.ArticuloFullDto;
 import utn.isi.dan.blog.danmsblog.mapstruct.dto.ArticuloPostDto;
@@ -36,8 +37,7 @@ public class ArticuloServiceImp implements IArticuloService {
     public List<ArticuloBasicoDto> obtenerArticulos() {
         List<Articulo> articulos = articuloRepository.findAll(sortByPublishDateDesc());
 
-        return articulos.stream().map(mapper::articuloToArticuloBasicoDto)
-                .collect(Collectors.toList());
+        return articulos.stream().map(mapper::articuloToArticuloBasicoDto).collect(Collectors.toList());
     }
 
     @Override
@@ -49,12 +49,17 @@ public class ArticuloServiceImp implements IArticuloService {
 
     @Override
     public ArticuloFullDto publicarArticulo(ArticuloPostDto articuloPostDto) {
-        Articulo articulo = mapper.articuloPostDtoToArticulo(articuloPostDto);
+        if (articuloRepository.existsByTitulo(articuloPostDto.getTitulo()))
+            throw new TituloAlreadyExistsException(articuloPostDto.getTitulo());
+
+        final Articulo articulo = mapper.articuloPostDtoToArticulo(articuloPostDto);
+
         articulo.setFechaPublicacion(Instant.now());
+        articulo.getSecciones().forEach((seccion) -> seccion.setArticulo(articulo));
 
-        articulo = articuloRepository.save(articulo);
+        Articulo articuloSaved = articuloRepository.save(articulo);
 
-        return mapper.articuloToArticuloFullDto(articulo);
+        return mapper.articuloToArticuloFullDto(articuloSaved);
     }
 
     @Override
