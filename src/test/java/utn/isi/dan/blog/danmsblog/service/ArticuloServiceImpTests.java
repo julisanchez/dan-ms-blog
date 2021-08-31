@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -27,6 +28,7 @@ import utn.isi.dan.blog.danmsblog.dao.CalificacionRepository;
 import utn.isi.dan.blog.danmsblog.domain.Articulo;
 import utn.isi.dan.blog.danmsblog.domain.Calificacion;
 import utn.isi.dan.blog.danmsblog.exception.ArticuloNotFoundException;
+import utn.isi.dan.blog.danmsblog.exception.TituloAlreadyExistsException;
 import utn.isi.dan.blog.danmsblog.mapstruct.dto.ArticuloBasicoDto;
 import utn.isi.dan.blog.danmsblog.mapstruct.dto.ArticuloFullDto;
 import utn.isi.dan.blog.danmsblog.mapstruct.dto.ArticuloPostDto;
@@ -59,6 +61,8 @@ public class ArticuloServiceImpTests {
     @BeforeEach
     void setUp() {
         articuloPost = new ArticuloPostDto();
+        articuloPost.setTitulo("titulo");
+        articuloPost.setSecciones(new ArrayList<>());
 
         calificacionDto = new CalificacionDto();
         calificacionDto.setArticuloId(1);
@@ -105,7 +109,8 @@ public class ArticuloServiceImpTests {
     }
 
     @Test
-    void testPublicarArticulo() {
+    void testPublicarArticuloTituloInexistente() {
+        when(articuloRepository.existsByTitulo(anyString())).thenReturn(false);
         when(articuloRepository.save(any(Articulo.class))).thenReturn(articulo);
 
         ArticuloFullDto articuloRes = articuloService.publicarArticulo(articuloPost);
@@ -113,6 +118,15 @@ public class ArticuloServiceImpTests {
         assertNotNull(articuloRes);
 
         verify(articuloRepository, times(1)).save(argThat((articulo) -> articulo.getFechaPublicacion() != null));
+    }
+
+    @Test
+    void testPublicarArticuloTituloExistente() {
+        when(articuloRepository.existsByTitulo(anyString())).thenReturn(true);
+
+        assertThrows(TituloAlreadyExistsException.class, () -> articuloService.publicarArticulo(articuloPost));
+
+        verify(articuloRepository, times(1)).existsByTitulo(anyString());
     }
 
     @Test
